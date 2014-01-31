@@ -9,7 +9,7 @@ defaultTasks 'clean', 'test'
 sourceSets {
   main {
     java {srcDir "$PLAY_APP/app"}
-    resources {srcDir "$PLAY_APP/app"}
+    resources {srcDir "$PLAY_APP/app" exclude 'play.plugins'}
   }
   test {
     java {srcDir "$PLAY_APP/test"}
@@ -22,10 +22,11 @@ dependencies {
   //println "$PLAY_APP/lib"
   //println "======================="
   compile fileTree(dir: "$PLAY_APP/lib", include: '*.jar')
+  compile fileTree(dir: "$PLAY_APP/lib/noDist", include: '*.jar')
 }
 
 def _resolveModule(module) {
-  return module.isDirectory() ? module : new File(module.text.trim()).getCanonicalFile();
+  return module.isDirectory() ? module : new File(module.name.trim()).getCanonicalFile();
 }
 
 def addModules() {
@@ -119,7 +120,7 @@ task uitest(type: Test, dependsOn: 'copyTestClassesToPlayPrecompiled') {
   }
   systemProperties['browser'] = 'chrome'
   systemProperties['selenide.timeout'] = '8000'
-  systemProperties['precompiled'] = 'true'
+  systemProperties['precompiled'] = 'false'
   systemProperties['BUILD_URL'] = System.getenv()['BUILD_URL']
   maxParallelForks = 2
 }
