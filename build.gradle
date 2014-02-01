@@ -1,5 +1,5 @@
 apply plugin: 'java'
-sourceCompatibility = 1.7
+sourceCompatibility = 1.6
 compileJava.options.debugOptions.debugLevel = "source,lines,vars"
 
 buildDir = "$PLAY_APP/build"
@@ -30,59 +30,59 @@ def _resolveModule(module) {
 }
 
 def addModules() {
-    //println "======================="
-    // println "using build file '$buildFile.name' in '$buildFile.parentFile.name'."
-    println "Play app: $PLAY_APP"
-    println "Play home: $PLAY_HOME"
-    //println "======================="
+  //println "======================="
+  // println "using build file '$buildFile.name' in '$buildFile.parentFile.name'."
+  println "Play app: $PLAY_APP"
+  println "Play home: $PLAY_HOME"
+  //println "======================="
 
-    //println sourceSets['main']['java']['srcDirs']
+  //println sourceSets['main']['java']['srcDirs']
 
-    _addModules(PLAY_APP)
+  _addModules(PLAY_APP)
 }
 
 def _addModules(appDirectory) {
-    def modules = new File(appDirectory, 'modules').listFiles()
+  def modules = new File(appDirectory, 'modules').listFiles()
 
-    modules.each {File module ->
-      module = _resolveModule(module)
+  modules.each {File module ->
+    module = _resolveModule(module)
 
-      sourceSets['main']['java']['srcDirs'] += new File(module, "app");
-      sourceSets['main']['resources']['srcDirs'] += new File(module, "app");
+    sourceSets['main']['java']['srcDirs'] += new File(module, "app");
+    sourceSets['main']['resources']['srcDirs'] += new File(module, "app");
 
-      File test = new File(module, "test")
-      def isModuleWithBrokenTests = module.name.matches("guice.*") || module.name.matches("cms.*");
+    File test = new File(module, "test")
+    def isModuleWithBrokenTests = module.name.matches("guice.*") || module.name.matches("cms.*");
 
-      if (test.exists() && !isModuleWithBrokenTests) {
-        sourceSets['test']['java']['srcDirs'] += test;
-        sourceSets['test']['resources']['srcDirs'] += test;
-      }
-      _addToClasspath("$module/lib")
-      if (module.isDirectory()) {
-        _addModules(module)
-      }
+    if (test.exists() && !isModuleWithBrokenTests) {
+      sourceSets['test']['java']['srcDirs'] += test;
+      sourceSets['test']['resources']['srcDirs'] += test;
     }
+    _addToClasspath("$module/lib")
+    if (module.isDirectory()) {
+      _addModules(module)
+    }
+  }
 
-    //println "src:"
-    //println sourceSets['main']['java']['srcDirs']
+  //println "src:"
+  //println sourceSets['main']['java']['srcDirs']
 
-    // println "Available processors: " + Runtime.runtime.availableProcessors()
-    //println ""
-    //println "======================="
+  // println "Available processors: " + Runtime.runtime.availableProcessors()
+  //println ""
+  //println "======================="
 }
 
 def addPlayToClasspath() {
-    _addToClasspath("$PLAY_HOME/framework/lib")
-    _addToClasspath("$PLAY_HOME/framework")
+  _addToClasspath("$PLAY_HOME/framework/lib")
+  _addToClasspath("$PLAY_HOME/framework")
 }
 
 def _addToClasspath(dir) {
-    // println "+ " + lib
+  // println "+ " + lib
 
-    def lib = fileTree(dir: dir, include: '*.jar')
-    sourceSets['main']['compileClasspath'] += lib
-    sourceSets['test']['compileClasspath'] += lib
-    sourceSets['test']['runtimeClasspath'] += lib
+  def lib = fileTree(dir: dir, include: '*.jar')
+  sourceSets['main']['compileClasspath'] += lib
+  sourceSets['test']['compileClasspath'] += lib
+  sourceSets['test']['runtimeClasspath'] += lib
 }
 
 task showClasspath << {
@@ -93,25 +93,17 @@ task showClasspath << {
 addModules()
 addPlayToClasspath()
 
-task copyTestClassesToPlayPrecompiled(type: Copy, dependsOn: 'testClasses') {
-  from project.sourceSets.test.output.classesDir
-  into "$PLAY_APP/precompiled/java"
-  include 'itest/**'
-  include 'ui/**'
-  outputs.upToDateWhen { false }
-}
-
 test {
   exclude 'ui/**'
   exclude 'integration/**'
   exclude 'itest/**'
 }
 
-task itest(type: Test, dependsOn: 'copyTestClassesToPlayPrecompiled') {
+task itest(type: Test) {
   include 'itest/**'
 }
 
-task uitest(type: Test, dependsOn: 'copyTestClassesToPlayPrecompiled') {
+task uitest(type: Test) {
   if (project.hasProperty('UITEST_CLASS')) {
     include UITEST_CLASS
   }
@@ -120,13 +112,12 @@ task uitest(type: Test, dependsOn: 'copyTestClassesToPlayPrecompiled') {
   }
   systemProperties['browser'] = 'chrome'
   systemProperties['selenide.timeout'] = '8000'
-  systemProperties['precompiled'] = 'false'
   systemProperties['BUILD_URL'] = System.getenv()['BUILD_URL']
   maxParallelForks = 2
 }
 
 tasks.withType(Test).all { testTask ->
-  testTask.jvmArgs = ['-ea', '-XX:-UseSplitVerifier', '-XX:MaxPermSize=256m']
+  testTask.jvmArgs = ['-ea', '-XX:MaxPermSize=256m']
   testTask.systemProperties['file.encoding'] = 'UTF-8'
   testTask.testLogging.showStandardStreams = true
   testTask.workingDir = PLAY_APP
