@@ -119,7 +119,10 @@ task uitest(type: Test) {
 tasks.withType(Test).all { testTask ->
   testTask.jvmArgs = ['-ea', '-XX:MaxPermSize=256m']
   testTask.systemProperties['file.encoding'] = 'UTF-8'
-  testTask.testLogging.showStandardStreams = true
+  testTask.testLogging {
+    showStandardStreams = true
+    events "passed", "skipped", "failed"
+  }
   testTask.workingDir = PLAY_APP
   testTask.outputs.upToDateWhen { false }
 }
