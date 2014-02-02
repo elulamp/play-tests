@@ -42,7 +42,7 @@ def execute(**kargs):
     app = kargs.get("app")
     args = kargs.get("args")
 
-    uitest_class_pattern = 'ui/**'
+    uitest_class_pattern = 'play/ui/**'
     gradle_opts = []
     remote_debug = False
     daemon = False
@@ -71,11 +71,11 @@ def execute(**kargs):
         gradle_opts.append('--daemon')
 
     if command == 'tests' or command == 'tests2':
-        run_tests(app, args, gradle_opts, 'clean', 'test', 'itest', 'uitest', '-PUITEST_CLASS=%s' % uitest_class_pattern)
+        run_tests(app, args, gradle_opts, 'clean', 'test')
     elif command == 'clean-tests' or command == 'clean-tests2':
-        run_tests(app, args, gradle_opts, 'cleanTest')
+        run_tests(app, args, gradle_opts, 'clean')
     elif command == 'unit-tests' or command == 'unit-tests2':
-        run_tests(app, args, gradle_opts, 'test')
+        run_tests(app, args, gradle_opts, 'unittest')
     elif command == 'ui-tests' or command == 'ui-tests2':
         run_tests(app, args, gradle_opts, 'uitest', '-PUITEST_CLASS=%s' % uitest_class_pattern)
     elif command == 'itests':

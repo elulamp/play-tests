@@ -94,13 +94,16 @@ addModules()
 addPlayToClasspath()
 
 test {
-  exclude 'ui/**'
-  exclude 'integration/**'
-  exclude 'itest/**'
+  systemProperties['browser'] = 'chrome'
+  systemProperties['selenide.timeout'] = '8000'
 }
 
 task itest(type: Test) {
-  include 'itest/**'
+  include 'play/unit/**'
+}
+
+task unittest(type: Test) {
+  include 'unit/**'
 }
 
 task uitest(type: Test) {
@@ -108,12 +111,10 @@ task uitest(type: Test) {
     include UITEST_CLASS
   }
   else {
-    include 'ui/**'
+    include 'play/ui/**'
   }
   systemProperties['browser'] = 'chrome'
   systemProperties['selenide.timeout'] = '8000'
-  systemProperties['BUILD_URL'] = System.getenv()['BUILD_URL']
-  maxParallelForks = 2
 }
 
 tasks.withType(Test).all { testTask ->
@@ -124,5 +125,4 @@ tasks.withType(Test).all { testTask ->
     events "passed", "skipped", "failed"
   }
   testTask.workingDir = PLAY_APP
-  testTask.outputs.upToDateWhen { false }
 }
