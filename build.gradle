@@ -99,10 +99,15 @@ test {
 }
 
 task itest(type: Test) {
-  include 'play/unit/**'
+  include 'bus/**'
+  include 'util/**'
+  include 'play/**'
+  exclude 'play/ui/**'
+  exclude 'bus/git/**'
 }
 
 task unittest(type: Test) {
+  include 'bus/git/**'
   include 'unit/**'
 }
 
